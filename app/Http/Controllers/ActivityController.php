@@ -14,13 +14,20 @@ class ActivityController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Activity::query()->orderBy('date', 'desc');
+        $user = Auth::user();
+
+    $query = Activity::query()->with(['user', 'uploader'])->orderBy('date', 'desc');
+
+        // Si no es admin, mostrar sólo actividades creadas por el usuario
+        if (!$user->isAdmin()) {
+            $query->where('created_by', $user->id);
+        }
 
         if ($request->filled('date')) {
             $query->where('date', $request->date);
         }
 
-        $activities = $query->paginate(25);
+    $activities = $query->paginate(25);
 
         return view('activities.index', compact('activities'));
     }
@@ -38,6 +45,11 @@ class ActivityController extends Controller
 
         $data['created_by'] = Auth::id();
 
+        // si no es admin, forzar user_id al usuario que crea
+        if (!Auth::user()->isAdmin()) {
+            $data['user_id'] = Auth::id();
+        }
+
         Activity::create($data);
 
         return redirect()->back()->with('status', 'Actividad registrada');
@@ -45,6 +57,10 @@ class ActivityController extends Controller
 
     public function edit(Activity $activity)
     {
+        $user = Auth::user();
+        if (!$user->isAdmin() && $activity->created_by !== $user->id) {
+            abort(403, 'No autorizado');
+        }
         return view('activities.edit', compact('activity'));
     }
 
@@ -59,6 +75,11 @@ class ActivityController extends Controller
             'user_id' => 'nullable|exists:users,id',
         ]);
 
+        $user = Auth::user();
+        if (!$user->isAdmin() && $activity->created_by !== $user->id) {
+            abort(403, 'No autorizado');
+        }
+
         $activity->update($data);
 
         return Redirect::route('activities.index')->with('status', 'Actividad actualizada');
@@ -66,6 +87,11 @@ class ActivityController extends Controller
 
     public function destroy(Activity $activity)
     {
+        $user = Auth::user();
+        if (!$user->isAdmin() && $activity->created_by !== $user->id) {
+            abort(403, 'No autorizado');
+        }
+
         $activity->delete();
         return Redirect::route('activities.index')->with('status', 'Actividad eliminada');
     }
@@ -73,7 +99,11 @@ class ActivityController extends Controller
     public function dailyPdf(Request $request)
     {
         $date = $request->input('date', now()->toDateString());
-        $activities = Activity::where('date', $date)->orderBy('created_at')->get();
+    $query = Activity::where('date', $date)->with(['user', 'uploader'])->orderBy('created_at');
+        if (!Auth::user()->isAdmin()) {
+            $query->where('created_by', Auth::id());
+        }
+        $activities = $query->get();
 
         $pdf = Pdf::loadView('activities.pdf.daily', compact('activities', 'date'));
 
@@ -86,9 +116,11 @@ class ActivityController extends Controller
         $endDate = \Carbon\Carbon::parse($end);
         $startDate = $endDate->copy()->startOfWeek();
 
-        $activities = Activity::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])
-            ->orderBy('date')
-            ->get();
+    $query = Activity::whereBetween('date', [$startDate->toDateString(), $endDate->toDateString()])->with(['user', 'uploader'])->orderBy('date');
+        if (!Auth::user()->isAdmin()) {
+            $query->where('created_by', Auth::id());
+        }
+        $activities = $query->get();
 
         $pdf = Pdf::loadView('activities.pdf.weekly', compact('activities', 'startDate', 'endDate'));
 

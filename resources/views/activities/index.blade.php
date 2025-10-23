@@ -3,7 +3,19 @@
 @section('title', 'Actividades')
 
 @section('content')
-    <div class="grid">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div style="display:flex;gap:8px">
+            <a class="btn" href="{{ route('activities.index') }}">Actividades</a>
+            @if(auth()->user() && auth()->user()->isAdmin())
+                <a class="btn secondary" href="{{ route('admin.users.index') }}">Usuarios</a>
+            @endif
+        </div>
+        <div>
+            <a class="btn" href="#activities-list">Ir al listado</a>
+        </div>
+    </div>
+
+    <div class="grid" id="activities-list">
         <div>
             <h2>Listado</h2>
             <div class="card">
@@ -15,6 +27,9 @@
                             <th>Descripción</th>
                             <th>Duración</th>
                             <th>Categoría</th>
+                            @if(auth()->user() && auth()->user()->isAdmin())
+                                <th>Usuario</th>
+                            @endif
                             <th>Acciones</th>
                         </tr>
                     </thead>
@@ -26,6 +41,9 @@
                                 <td>{{ $act->description }}</td>
                                 <td>{{ $act->duration_minutes }}</td>
                                 <td>{{ $act->category }}</td>
+                                @if(auth()->user() && auth()->user()->isAdmin())
+                                    <td>{{ optional($act->uploader)->name ?? optional($act->user)->name ?? '—' }}</td>
+                                @endif
                                 <td style="width:160px">
                                     <div class="actions">
                                         <a class="btn" href="{{ route('activities.edit', $act) }}">Editar</a>
@@ -38,7 +56,11 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="6" class="muted">No hay actividades</td></tr>
+                            @if(auth()->user() && auth()->user()->isAdmin())
+                                <tr><td colspan="7" class="muted">No hay actividades</td></tr>
+                            @else
+                                <tr><td colspan="6" class="muted">No hay actividades</td></tr>
+                            @endif
                         @endforelse
                     </tbody>
                 </table>

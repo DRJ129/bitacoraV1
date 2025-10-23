@@ -27,4 +27,12 @@ class Activity extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    /**
+     * Usuario que subió/creó la actividad (created_by)
+     */
+    public function uploader()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }

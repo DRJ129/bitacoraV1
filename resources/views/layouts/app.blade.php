@@ -70,5 +70,6 @@
 
         <footer class="muted">Generado por el sistema de bitácora</footer>
     </div>
+    <a href="{{ route('activities.index') }}" style="position:fixed;right:18px;bottom:18px;background:var(--primary);color:#fff;padding:10px 12px;border-radius:10px;text-decoration:none;box-shadow:0 6px 18px rgba(15,23,42,0.08)">Volver a Actividades</a>
 </body>
 </html>

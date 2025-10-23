@@ -3,6 +3,9 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\PreventBackHistory;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +22,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Registrar alias de middleware 'admin' para control de acceso por role
+        Route::aliasMiddleware('admin', AdminMiddleware::class);
+        Route::aliasMiddleware('prevent-back', PreventBackHistory::class);
     }
 }

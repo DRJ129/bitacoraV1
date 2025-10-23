@@ -25,12 +25,16 @@ class AuthController extends Controller
             'questions' => 'required|array|size:3',
             'questions.*.question' => 'required|string|max:255',
             'questions.*.answer' => 'required|string|max:255',
+            'role' => 'nullable|in:user,admin',
         ]);
+
+        $role = $data['role'] ?? 'user';
 
         $user = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
             'password' => $data['password'],
+            'role' => $role,
         ]);
 
         foreach ($data['questions'] as $q) {

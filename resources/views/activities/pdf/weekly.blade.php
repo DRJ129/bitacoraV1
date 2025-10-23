@@ -30,6 +30,7 @@
                 <th>Descripción</th>
                 <th>Duración (min)</th>
                 <th>Categoría</th>
+                <th>Usuario</th>
             </tr>
         </thead>
         <tbody>
@@ -40,9 +41,10 @@
                     <td>{{ $a->description }}</td>
                     <td>{{ $a->duration_minutes }}</td>
                     <td>{{ $a->category }}</td>
+                    <td>{{ optional($a->uploader)->name ?? optional($a->user)->name ?? '—' }}</td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="meta">No hay actividades</td></tr>
+                <tr><td colspan="6" class="meta">No hay actividades</td></tr>
             @endforelse
         </tbody>
     </table>

@@ -10,8 +10,9 @@ use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordRecoveryController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\UserController;
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'prevent-back'])->group(function () {
     Route::get('/activities', [ActivityController::class, 'index'])->name('activities.index');
     Route::post('/activities', [ActivityController::class, 'store'])->name('activities.store');
     Route::get('/activities/{activity}/edit', [ActivityController::class, 'edit'])->name('activities.edit');
@@ -19,6 +20,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/activities/{activity}', [ActivityController::class, 'destroy'])->name('activities.destroy');
     Route::get('/activities/pdf/daily', [ActivityController::class, 'dailyPdf'])->name('activities.dailyPdf');
     Route::get('/activities/pdf/weekly', [ActivityController::class, 'weeklyPdf'])->name('activities.weeklyPdf');
+    // Admin: gestión de usuarios
+    Route::middleware('admin')->group(function () {
+        Route::get('/admin/users', [UserController::class, 'index'])->name('admin.users.index');
+        Route::get('/admin/users/{user}/edit', [UserController::class, 'edit'])->name('admin.users.edit');
+        Route::put('/admin/users/{user}', [UserController::class, 'update'])->name('admin.users.update');
+        Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('admin.users.destroy');
+    });
 });
 
 // Auth
